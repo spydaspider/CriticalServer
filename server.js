@@ -10,6 +10,9 @@ app.use((req,res, next)=>{
     console.log(req.path, req.body);
     next();
 })
+app.get('/', (req, res) => {
+    res.send('Knackers Bank Backend is running!');
+  });
 const PORT = process.env.PORT || 5000
  app.use('/api/users',users);
  app.use('/api/accounts',bankAccounts);
