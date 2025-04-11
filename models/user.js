@@ -24,7 +24,16 @@ const UserSchema = new Schema({
       },
       otpExpiresAt: {
         type: Date,
+      },
+      failedLoginAttempts: {
+        type: Number,
+        default: 0
+      },
+      loginLockUntil: {
+        type: Date,
+        default: null
       }
+
 
 },{timeStamps: true})
 UserSchema.statics.signup = async function(username, email, password){
@@ -69,11 +78,35 @@ UserSchema.statics.login = async function(email, password){
     {
         throw Error('Email is not found');
     }
+    //check to see if system is locked
+    if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil > new Date())
+    {
+        const minutes = Math.ceil((isCorrectEmail.loginLockUntil - new Date())/(60 * 1000));
+        throw Error(`Account is locked. Try again in ${minutes} minutes(s).`);
+
+    }
+
+    
     const isCorrectPassword = await bcrypt.compare(password, isCorrectEmail.password);
     if(!isCorrectPassword)
     {
+        isCorrectEmail.failedLoginAttempts += 1;
+        throw Error('Password is not correct');
+
+    }
+    //lock the account if 4 attempst fail
+
+
+    if(isCorrectEmail.failedLoginAttempts >= 5){
+        isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+        isCorrectEmail.failedLoginAttempts = 0;
+        await isCorrectEmail.save();
         throw Error('Password is not correct');
     }
+    //if login is successful this time, reset the attempts
+    isCorrectEmail.failedLoginAttemps = 0;
+    isCorrectEmail.loginLockUntil = null;
+    await isCorrectEmail.save();
     return isCorrectEmail;
 }
 module.exports = mongoose.model('User', UserSchema);
