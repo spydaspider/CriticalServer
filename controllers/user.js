@@ -1,12 +1,18 @@
 const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
+const crypto = require('crypto');
 
 
-const createToken = (_id) =>{
+ const createToken = (_id) =>{
     return jwt.sign({_id}, process.env.SECRET, {expiresIn: '2d'});
 
 }
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+};
+
+
 const verifyEmail = async (req, res) => {
     const { token } = req.query;
   
@@ -70,4 +76,93 @@ const login = async(req, res) =>{
         res.status(400).json({error: error.message});
     }
 }
-module.exports = { signup, login, verifyEmail}
+const getAllUsers = async(req,res)=>{
+  try{
+       const users = await User.find();
+       res.status(200).json(users);
+
+  }
+  catch(error)
+  {
+    res.status(400).json({error: error.message});
+  }
+}
+
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found with that email' });
+    }
+
+    const otp = generateOTP();
+    const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
+
+    // Save OTP and expiry to user
+    user.resetOTP = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    await user.save();
+
+    const emailTemplate = `
+      <h1>Password Reset OTP</h1>
+      <p>Hello ${user.username},</p>
+      <p>Use the following One-Time Password (OTP) to reset your Knackers Bank account password:</p>
+      <h2>${otp}</h2>
+      <p>This OTP will expire in 15 minutes.</p>
+      <p>If you did not request this, please ignore this email.</p>
+    `;
+
+    await sendBrevoEmail({
+      subject: 'Knackers Bank Password Reset OTP',
+      to: [{ email: email, name: user.username }],
+      emailTemplate,
+    });
+
+    res.status(200).json({ message: 'OTP sent to your email' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const verifyOTPAndResetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if OTP matches
+    if (user.resetOTP !== otp) {
+      return res.status(400).json({ error: 'Invalid OTP' });
+    }
+
+    // Check if OTP has expired
+    if (user.otpExpiresAt < new Date()) {
+      return res.status(400).json({ error: 'OTP has expired' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password and clear OTP fields
+    user.password = hashedPassword;
+    user.resetOTP = null;
+    user.otpExpiresAt = null;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+module.exports = { signup, login, verifyEmail,getAllUsers,forgotPassword,verifyOTPAndResetPassword}

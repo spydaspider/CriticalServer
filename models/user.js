@@ -18,6 +18,12 @@ const UserSchema = new Schema({
     emailVerified: {
         type: Boolean,
         default: false
+      },
+      resetOTP: {
+        type: String,
+      },
+      otpExpiresAt: {
+        type: Date,
       }
 
 },{timeStamps: true})
