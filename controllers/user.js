@@ -2,6 +2,7 @@ const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 
  const createToken = (_id) =>{
