@@ -79,6 +79,7 @@ UserSchema.statics.login = async function(email, password){
         throw Error('Email is not found');
     }
     //check to see if system is locked
+
     if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil > new Date())
     {
         const minutes = Math.ceil((isCorrectEmail.loginLockUntil - new Date())/(60 * 1000));
@@ -91,22 +92,37 @@ UserSchema.statics.login = async function(email, password){
     if(!isCorrectPassword)
     {
         isCorrectEmail.failedLoginAttempts += 1;
+    
+        await isCorrectEmail.save();
+        console.log("Failed");
+        console.log("login failed attemptps", isCorrectEmail.failedLoginAttempts);
+        if(isCorrectEmail.failedLoginAttempts >= 5){
+            console.log("greater than 5");
+              isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+            isCorrectEmail.failedLoginAttempts = 0;
+            await isCorrectEmail.save();
+            throw Error('Password is not correct. Your account is locked for 15 minutes.');
+
+            
+    
+        }
+        
+
         throw Error('Password is not correct');
 
     }
+    
     //lock the account if 4 attempst fail
 
-
-    if(isCorrectEmail.failedLoginAttempts >= 5){
-        isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
-        isCorrectEmail.failedLoginAttempts = 0;
-        await isCorrectEmail.save();
-        throw Error('Password is not correct');
-    }
-    //if login is successful this time, reset the attempts
-    isCorrectEmail.failedLoginAttemps = 0;
+   
+    //if login is successful this time, reset the attemptssa
+    if(isCorrectPassword)
+    {
+    isCorrectEmail.failedLoginAttempts = 0;
     isCorrectEmail.loginLockUntil = null;
     await isCorrectEmail.save();
+    }
     return isCorrectEmail;
+    
 }
 module.exports = mongoose.model('User', UserSchema);
