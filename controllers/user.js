@@ -69,9 +69,9 @@ const login = async(req, res) =>{
     const { email, password } = req.body;
     try{
         const user = await User.login(email, password);
-        const token = createToken(user.id);
+         const token = createToken(user.id);
         const userId = user.id;
-        res.status(200).json({email, token, userId});
+        res.status(200).json({email:user.email, token, userId, role: user.role, emailVerified: user.emailVerified, loginLockUntil: user.loginLockUntil}); 
     }
     catch(error){
         res.status(400).json({error: error.message});
