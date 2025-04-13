@@ -74,7 +74,7 @@ const login = async(req, res) =>{
         res.status(200).json({email:user.email, token, userId, role: user.role, emailVerified: user.emailVerified, loginLockUntil: user.loginLockUntil}); 
     }
     catch(error){
-        res.status(400).json({error: error.message});
+        res.status(400).json({error: error.message,loginLockUntil: error.loginLockUntil || null});
     }
 }
 const getAllUsers = async(req,res)=>{

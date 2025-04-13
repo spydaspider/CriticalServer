@@ -87,7 +87,9 @@ UserSchema.statics.login = async function(email, password){
     if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil > new Date())
     {
         const minutes = Math.ceil((isCorrectEmail.loginLockUntil - new Date())/(60 * 1000));
-        throw Error(`Account is locked. Try again in ${minutes} minutes(s).`);
+        const err = new Error(`Account is locked. Try again in ${minutes} minutes(s).`);
+        err.loginLockUntil = isCorrectEmail.loginLockUntil;
+        throw err;
 
     }
 
@@ -105,7 +107,9 @@ UserSchema.statics.login = async function(email, password){
               isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
             isCorrectEmail.failedLoginAttempts = 0;
             await isCorrectEmail.save();
-            throw Error('Password is not correct. Your account is locked for 15 minutes.');
+            const err = new Error('Password is not correct. Your account is locked for 15 minutes.');
+            err.loginLockUntil = isCorrectEmail.loginLockUntil;
+            throw err;            
 
             
     
