@@ -122,7 +122,7 @@ const forgotPassword = async (req, res) => {
       emailTemplate,
     });
 
-    res.status(200).json({ message: 'OTP sent to your email' });
+    res.status(200).json({ message: 'OTP sent to your email', email: user.email });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
