@@ -4,7 +4,7 @@ const auth = async(req,res,next)=>{
     const { authorization } = req.headers;
     if(!authorization)
     {
-        res.status(400).json({error: 'No token'});
+        return res.status(400).json({error: 'No token'});
     }
 
     const token = authorization.split(' ')[1];
@@ -14,7 +14,7 @@ const auth = async(req,res,next)=>{
           next();
     }
     catch(error){
-        res.status(400).json({error:'Invalid token'});
+        return res.status(400).json({error:'Invalid token'});
     }
 }
 module.exports = auth;

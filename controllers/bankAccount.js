@@ -1,10 +1,13 @@
 const Account = require('../models/bankAccount.js');
 const mongoose = require('mongoose');
 const generateAccountNumber = require('../helpers/generateAccountNumber.js');
+const bcrypt = require('bcrypt');
 
 const createAccount = async(req,res)=>{
+    
      const user = req.user._id;
-     const {accountName, idNumber, balance } = req.body;
+     const {accountName, idNumber, address, pin } = req.body;
+    
     
      try{
         const accountExists = await Account.findOne({user});
@@ -13,7 +16,10 @@ const createAccount = async(req,res)=>{
             return res.status(400).json({error: 'Account already exist'});
         }
         const accountNumber = generateAccountNumber();
-         const account = await Account.create({accountName,idNumber, balance, user, accountNumber: 'ACC'+accountNumber });
+        //hash the four digit pin
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(pin, salt);
+         const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber });
          res.status(200).json(account); 
 
      }

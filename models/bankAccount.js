@@ -14,15 +14,26 @@ const BankAccountSchema = new Schema({
             ref: 'User', 
             required: true 
         },
-        balance: {
-            type: mongoose.Schema.Types.Decimal128,
+        address: {
+            type: String,
             required: true,
-            default: mongoose.Types.Decimal128.fromString('0.0')
+        
+        },
+        pin:{
+            type: String,
+            required:true 
         },
         accountNumber:{
             type: String,
             required: true,
+        },
+       
+        balance: {
+            type: mongoose.Schema.Types.Decimal128,
+            required: true,
+            default: mongoose.Types.Decimal128.fromString('0.0')
         }
+       
 })
 
 module.exports = mongoose.model('Account', BankAccountSchema);

@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000
  app.use('/api/accounts',bankAccounts);
 /*  app.use('/api/transactions', transactions);
  */ mongoose.connect(process.env.MONGO_URI).then(()=>{
-    app.listen(PORT,()=>{
+    app.listen(PORT,()=>{    
         console.log("connected to the mongoose server on ", PORT);
     })
 }).catch((error)=>{

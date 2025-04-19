@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 
  const createToken = (_id) =>{
-    return jwt.sign({_id}, process.env.SECRET, {expiresIn: '2d'});
+    return jwt.sign({_id}, process.env.SECRET, {expiresIn: '1d'});
 
 }
 const generateOTP = () => {
@@ -36,11 +36,11 @@ const verifyEmail = async (req, res) => {
 const signup = async(req, res) =>{
     const { username, email, password, role} = req.body;
     try{
-          const user = await User.signup(username, email, password,role);
+          const user = await User.signup(username, email, password, role);
           const token = createToken(user.id);
           const userId = user.id;
 
-          const verificationToken = jwt.sign({ userId: user._id }, process.env.SECRET, { expiresIn: '1d' });
+          const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
 
           const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${verificationToken}`;
           
