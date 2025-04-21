@@ -10,9 +10,10 @@ const createAccount = async(req,res)=>{
      const user = req.user._id;
      const {username,email} = req.user;
      const {accountName, idNumber, address, pin } = req.body;
+
     
     
-     try{
+      try{
         const accountExists = await Account.findOne({user});
         if(accountExists)
         {
