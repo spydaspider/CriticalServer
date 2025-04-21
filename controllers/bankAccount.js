@@ -26,11 +26,13 @@ const createAccount = async(req,res)=>{
          const emailTemplate = `
          <h1>Thank you ${username}!</h1>
          <p>You have successfully created a new bank account with Knackers Bank.</p>
-         <p>This is your account number ${'ACC'+accountNumber}</p>
+         <p>Below is your account Details</p>
+         <p>Account name:           ${accountName}</p>
+         <p>Account Number:         ${'ACC'+accountNumber}</p>
        `;
 // Call the Brevo email function
 await sendBrevoEmail({
-subject: 'New Bank Account',
+subject: 'New Bank Details',
 to: [{ email: email, name: username }],
 emailTemplate,
 });
