@@ -1,6 +1,8 @@
 const Account = require('../models/bankAccount.js');
 const mongoose = require('mongoose');
 const generateAccountNumber = require('../helpers/generateAccountNumber.js');
+const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
+
 const bcrypt = require('bcrypt');
 
 const createAccount = async(req,res)=>{
@@ -20,6 +22,17 @@ const createAccount = async(req,res)=>{
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(pin, salt);
          const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber });
+         const emailTemplate = `
+         <h1>Thank you ${user.username}!</h1>
+         <p>You have successfully created a new bank account with Knackers Bank.</p>
+         <p>This is your account number ${'ACC'+accountNumber}</p>
+       `;
+// Call the Brevo email function
+await sendBrevoEmail({
+subject: 'New Bank Account',
+to: [{ email: email, name: username }],
+emailTemplate,
+});
          res.status(200).json(account); 
 
      }
