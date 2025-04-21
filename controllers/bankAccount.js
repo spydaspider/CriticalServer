@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const createAccount = async(req,res)=>{
     
      const user = req.user._id;
+     const {username} = req.user;
      const {accountName, idNumber, address, pin } = req.body;
     
     
@@ -23,7 +24,7 @@ const createAccount = async(req,res)=>{
         const hash = await bcrypt.hash(pin, salt);
          const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber });
          const emailTemplate = `
-         <h1>Thank you ${user.username}!</h1>
+         <h1>Thank you ${username}!</h1>
          <p>You have successfully created a new bank account with Knackers Bank.</p>
          <p>This is your account number ${'ACC'+accountNumber}</p>
        `;
