@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const createAccount = async(req,res)=>{
     
      const user = req.user._id;
-     const {username} = req.user;
+     const {username,email} = req.user;
      const {accountName, idNumber, address, pin } = req.body;
     
     
