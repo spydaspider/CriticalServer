@@ -5,6 +5,6 @@ const router = express.Router();
 router.post('/', auth, createAccount);
 router.get('/',auth,getAccount);
 router.get('/allAccounts', getAllAccounts);
-router.put('/:id',updateAccount);
-router.delete('/:id', deleteAccount);
+router.put('/',updateAccount);
+router.delete('/', deleteAccount);
 module.exports = router;

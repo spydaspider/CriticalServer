@@ -68,13 +68,10 @@ const getAllAccounts = async(req,res) =>{
      }
 }
 const updateAccount = async(req, res)=>{
-    const { id } = req.params;
-    if(!mongoose.Types.ObjectId.isValid(id))
-    {
-        return res.status(400).json({error:'Invalid account ID'});
-    }
+    const { accountNumber } = req.body;
+    
     try{
-          const account = await Account.findOneAndUpdate({_id:id},{
+          const account = await Account.findOneAndUpdate({accountNumber},{
             ...req.body
              
           })
@@ -88,13 +85,10 @@ const updateAccount = async(req, res)=>{
 
 }
 const deleteAccount = async(req, res)=>{
-    const { id } = req.params;
-    if(!mongoose.Types.ObjectId.isValid(id))
-    {
-        return res.status(400).json({error: 'Invalid account identification'});
-    }
+    const { accountNumber } = req.body;
+   
     try{
-            const account = await Account.findOneAndDelete({_id: id});
+            const account = await Account.findOneAndDelete({accountNumber});
             res.status(200).json(account);
     }
     catch(error)
