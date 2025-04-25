@@ -97,10 +97,57 @@ const deleteAccount = async(req, res)=>{
     }
 
 }
+const deposit = async(req,res)=>{
+    const { accountNumber, depositAmount } = req.body;
+   
+    //get the account and add to the balance already there
+    try{
+    const account = await Account.findOne({accountNumber});
+    const newAmount = parseFloat(account.balance.toString())+parseFloat(depositAmount);
+    //save newAmount into the database
+    account.balance = newAmount;
+    await account.save();
+    res.status(200).json(account);
+    }
+    catch(error){
+        res.status(400).json({error: error.message});
+    }
+    
+}
+const withdrawal = async(req,res)=>{
+    const { accountNumber, withdrawalAmount, pin } = req.body;
+   
+    //get the account and add to the balance already there
+    try{
+    const account = await Account.findOne({accountNumber});
+    if(parseFloat(account.balance.toString()) < parseFloat(withdrawalAmount))
+    {
+        res.status(400).json({error:'You do not have insufficient funds.'});
+        return;
+    }
+    //compare pin
+        const isCorrectPin = await bcrypt.compare(pin, account.pin);
+        if(!isCorrectPin)
+        {
+            res.status(400).json({error: 'Incorrect pin, cannot proceed with the transaction'});
+            return;
+        }
+    
+    const newAmount = parseFloat(account.balance.toString())-parseFloat(withdrawalAmount);
+    //save newAmount into the database
+    account.balance = newAmount;
+    await account.save();
+    res.status(200).json(account);
+    }
+    catch(error){
+        res.status(400).json({error: error.message});
+    }
+    
+}
 
 
 module.exports = {
-    createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount
+    createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount,deposit,withdrawal
 }
 
 

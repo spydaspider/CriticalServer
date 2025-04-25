@@ -1,5 +1,5 @@
 const express = require('express');
-const  {createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount} = require('../controllers/bankAccount.js');
+const  {createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount, deposit, withdrawal} = require('../controllers/bankAccount.js');
 const auth = require('../middleware/auth.js');
 const router = express.Router();
 router.post('/', auth, createAccount);
@@ -7,4 +7,6 @@ router.get('/',auth,getAccount);
 router.get('/allAccounts', getAllAccounts);
 router.put('/',updateAccount);
 router.delete('/', deleteAccount);
+router.put('/deposit', deposit);
+router.put('/withdrawal', withdrawal)
 module.exports = router;

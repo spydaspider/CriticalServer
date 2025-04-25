@@ -6,5 +6,5 @@ router.post('/login', login);
 router.get('/verifyEmail', verifyEmail);
 router.get('/allUsers', getAllUsers);
 router.post('/forgotPassword', forgotPassword);
-router.post('/resetPassword',verifyOTPAndResetPassword)
+router.post('/resetPassword',verifyOTPAndResetPassword);
 module.exports = router;
