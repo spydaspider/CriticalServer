@@ -131,7 +131,7 @@ emailTemplate,
 });
     
     
-    res.status(200).json(account);
+    res.status(200).json({account, email: user.email});
     }
     catch(error){
         res.status(400).json({error: error.message});
@@ -178,7 +178,7 @@ to: [{ email: user.email, name: user.username }],
 emailTemplate,
 });
     
-    res.status(200).json(account);
+    res.status(200).json({account, email: user.email, username: user.username});
     }
     catch(error){
         res.status(400).json({error: error.message});
