@@ -27,6 +27,10 @@ const BankAccountSchema = new Schema({
             type: String,
             required: true,
         },
+        email:{
+            type:String,
+            required: true
+        },
        
         balance: {
             type: mongoose.Schema.Types.Decimal128,

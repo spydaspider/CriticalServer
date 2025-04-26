@@ -23,7 +23,7 @@ const createAccount = async(req,res)=>{
         //hash the four digit pin
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(pin, salt);
-         const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber });
+         const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber, email });
          const emailTemplate = `
          <h1>Thank you ${username}!</h1>
          <p>You have successfully created a new bank account with Knackers Bank.</p>
@@ -131,7 +131,7 @@ emailTemplate,
 });
     
     
-    res.status(200).json({account, email: user.email});
+    res.status(200).json(account);
     }
     catch(error){
         res.status(400).json({error: error.message});
@@ -178,7 +178,7 @@ to: [{ email: user.email, name: user.username }],
 emailTemplate,
 });
     
-    res.status(200).json({account, email: user.email, username: user.username});
+    res.status(200).json(account);
     }
     catch(error){
         res.status(400).json({error: error.message});
