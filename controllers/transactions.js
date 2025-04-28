@@ -171,13 +171,13 @@ const withdrawal = async(req,res)=>{
                 //send email to notify user
                 const emailTemplate = `
 
-    <p>Multiple failed withdrawal attempt, we have locked the account for 15minutes, reset your pin</p>
+    <p>Multiple failed withdrawal attempts, we have locked the account for 15minutes, reset your pin</p>
     
     
   `;
 // Call the Brevo email function
 await sendBrevoEmail({
-subject: 'New Transaction',
+subject: 'Multiple Failed Withdrawal Attempts',
 to: [{ email: user.email, name: user.username }],
 emailTemplate,
 });
