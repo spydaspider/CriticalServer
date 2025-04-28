@@ -1,8 +1,7 @@
  const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Account = require('./bankAccount');
 const TransactionSchema = new Schema({
-     amount: {
+      amount: {
         type: mongoose.Schema.Types.Decimal128,
         required: true,
         default: '0.0', // or: default: mongoose.Types.Decimal128.fromString('0.0') 
@@ -12,7 +11,20 @@ const TransactionSchema = new Schema({
         enum: ['deposit', 'withdrawal', 'transfer'],
         required: true 
      },
-     fromAccount:{
+     user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', 
+        required: true 
+    },
+    transactionDate:{
+        type: Date,
+        default: Date.now 
+    } ,
+    accountNumber:{
+        type: String,
+        required: true 
+    }
+    /* fromAccount:{
         type: String,
         required: function(){
             return this.type === 'withdrawal' || this.type === 'transfer'; 
@@ -27,18 +39,10 @@ const TransactionSchema = new Schema({
      description:{
         type:String,
      },
-     user:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
-        required: true 
-    },
-    transactionDate:{
-        type: Date,
-        default: Date.now 
-    } 
+     */
 
 },{timestamps:true})
-TransactionSchema.pre('save', async function (next) {
+/* TransactionSchema.pre('save', async function (next) {
     const Account = require('./models/Account'); // Import Account model
 
     // Withdrawal: Deduct from user's own account
@@ -103,6 +107,6 @@ TransactionSchema.pre('save', async function (next) {
     }
 
     next();
-});
+}); */
 module.exports = mongoose.model('Transaction', TransactionSchema);
  

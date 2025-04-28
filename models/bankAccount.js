@@ -36,7 +36,21 @@ const BankAccountSchema = new Schema({
             type: mongoose.Schema.Types.Decimal128,
             required: true,
             default: mongoose.Types.Decimal128.fromString('0.0')
-        }
+        },
+        resetPinOTP: {
+            type: String,
+          },
+          pinOtpExpiresAt: {
+            type: Date,
+          },
+          failedWithdrawalAttempts: {
+            type: Number,
+            default: 0
+          },
+          withdrawalLockUntil: {
+            type: Date,
+            default: null
+          }
        
 })
 

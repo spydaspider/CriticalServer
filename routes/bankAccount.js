@@ -7,6 +7,5 @@ router.get('/',auth,getAccount);
 router.get('/allAccounts', getAllAccounts);
 router.put('/',updateAccount);
 router.delete('/', deleteAccount);
-router.put('/deposit', deposit);
-router.put('/withdrawal', withdrawal)
+
 module.exports = router;

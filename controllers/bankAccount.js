@@ -1,7 +1,6 @@
 const Account = require('../models/bankAccount.js');
 const generateAccountNumber = require('../helpers/generateAccountNumber.js');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
-const User = require('../models/user.js');
 
 const bcrypt = require('bcrypt');
 
@@ -97,98 +96,10 @@ const deleteAccount = async(req, res)=>{
     }
 
 }
-const deposit = async(req,res)=>{
-    const { accountNumber, depositAmount } = req.body;
-    
-   
-    //get the account and add to the balance already there
-    try{
-    const account = await Account.findOne({accountNumber});
-    if(!account)
-    {
-        res.status(400).json({error: 'Account not found'});
-        return;
-    }
-    const newAmount = parseFloat(account.balance.toString())+parseFloat(depositAmount);
-    //save newAmount into the database
-    account.balance = newAmount;
-    await account.save();
-    //get the pounds symbol
-    const pounds = String.fromCharCode(163);  // 163 is the code for £
-
-    //get the email of the user of this account.
-    const user = await User.findOne({_id: account.user.toString()});
-    const emailTemplate = `
-
-    <p>Payment of ${pounds}${depositAmount} has been made to your KnackersBank account, your new balance is ${pounds}${newAmount}</p>
-    
-  `;
-// Call the Brevo email function
-await sendBrevoEmail({
-subject: 'New Transaction',
-to: [{ email: user.email, name: user.username }],
-emailTemplate,
-});
-    
-    
-    res.status(200).json(account);
-    }
-    catch(error){
-        res.status(400).json({error: error.message});
-    }
-    
-}
-const withdrawal = async(req,res)=>{
-    const { accountNumber, withdrawalAmount, pin } = req.body;
-   
-    //get the account and add to the balance already there
-    try{
-    const account = await Account.findOne({accountNumber});
-    if(parseFloat(account.balance.toString()) < parseFloat(withdrawalAmount))
-    {
-        res.status(400).json({error:'You do not have insufficient funds.'});
-        return;
-    }
-    //compare pin
-        const isCorrectPin = await bcrypt.compare(pin, account.pin);
-        if(!isCorrectPin)
-        {
-            res.status(400).json({error: 'Incorrect pin, cannot proceed with the transaction'});
-            return;
-        }
-    
-    const newAmount = parseFloat(account.balance.toString())-parseFloat(withdrawalAmount);
-    //save newAmount into the database
-    account.balance = newAmount;
-    await account.save();
-    const pounds = String.fromCharCode(163);  // 163 is the code for £
-
-    //get the email of the user of this account.
-    const user = await User.findOne({_id: account.user.toString()});
-    const emailTemplate = `
-
-    <p>An amount of ${pounds}${withdrawalAmount} has been withdrawn from your KnackersBank account, your new balance is ${pounds}${newAmount}</p>
-    <p>If you did not authorize this, call the bank</p>
-    
-  `;
-// Call the Brevo email function
-await sendBrevoEmail({
-subject: 'New Transaction',
-to: [{ email: user.email, name: user.username }],
-emailTemplate,
-});
-    
-    res.status(200).json(account);
-    }
-    catch(error){
-        res.status(400).json({error: error.message});
-    }
-    
-}
 
 
 module.exports = {
-    createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount,deposit,withdrawal
+    createAccount,getAccount, getAllAccounts, updateAccount, deleteAccount,
 }
 
 
