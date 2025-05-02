@@ -8,15 +8,16 @@ const bcrypt = require('bcrypt');
 
 //getTransaction
 const getTransactions = async(req,res)=>{
-    const user_id = req.user._id;
-    try{
-    const transaction = await Transactions.findOne({user_id});
+    
+
+     try{
+    const transaction = await Transactions.find();
     res.status(200).json(transaction);
     }
     catch(error)
     {
         res.status(400).json({error: error.message});
-    }
+    } 
 }
 //getTransactions
 const getTransaction = async(req,res)=>{
@@ -171,13 +172,13 @@ const withdrawal = async(req,res)=>{
                 //send email to notify user
                 const emailTemplate = `
 
-    <p>Multiple failed withdrawal attempts, we have locked the account for 15minutes, reset your pin</p>
+    <p>Failed multiple withdrawal attempts, we have locked the account for 15minutes, reset your pin</p>
     
     
   `;
 // Call the Brevo email function
 await sendBrevoEmail({
-subject: 'Multiple Failed Withdrawal Attempts',
+subject: 'Failed Withdrawal Attempts',
 to: [{ email: user.email, name: user.username }],
 emailTemplate,
 });
@@ -226,13 +227,13 @@ emailTemplate,
     res.status(200).json(account);
     }
     catch(error){
-        res.status(400).json({error: error.message});
+        res.status(400).json({error: error.message,withdrawalLockUntil: error.withdrawlLockUntil || null});
     }
     
 }
 
 module.exports = {
-    createTransaction,getTransactions,getTransaction,updateTransaction, deleteTransaction,deposit,withdrawal 
+    createTransaction,getTransactions,getTransaction,updateTransaction, deleteTransaction,deposit,withdrawal
 }
 
  

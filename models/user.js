@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 const validator = require('validator');
+const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
+
 const UserSchema = new Schema({
     username: {
         type: String, 
@@ -109,7 +111,20 @@ UserSchema.statics.login = async function(email, password){
             await isCorrectEmail.save();
             const err = new Error('Password is not correct. Your account is locked for 15 minutes.');
             err.loginLockUntil = isCorrectEmail.loginLockUntil;
-            throw err;            
+        
+            const emailTemplate = `
+            
+                <p>Failed multiple login attempts, we have locked the account for 15minutes, reset your pin</p>
+                
+                
+              `;
+            // Call the Brevo email function
+            await sendBrevoEmail({
+            subject: 'Failed login Attempts',
+            to: [{ email, name: isCorrectEmail.username }],
+            emailTemplate,
+            });  
+            throw err;        
 
             
     
@@ -120,7 +135,7 @@ UserSchema.statics.login = async function(email, password){
 
     }
     
-    //lock the account if 4 attempst fail
+    //lock the account if 4 attempts fail
 
    
     //if login is successful this time, reset the attemptssa
