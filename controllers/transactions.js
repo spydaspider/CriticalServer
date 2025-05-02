@@ -42,14 +42,15 @@ const getTransaction = async(req,res)=>{
 
     
     try{
-        const { amount, type, user_id,accountNumber, transactionDate } = req.body;
-        const transaction = new Transactions({amount, type, user_id,accountNumber, transactionDate});
+        const { amount, type, user_id,accountNumber,accountName, transactionDate } = req.body;
+        console.log(accountName);
+        const transaction = new Transactions({amount, type, user_id,accountNumber,accountName, transactionDate});
         await transaction.save();
-        res.status(200).json({message: 'Transaction successful', transaction});
+        res.status(200).json({message: 'Transaction successful', transaction}); 
 
     }
     catch(error){
-        return res.status(400).json({error: "Failed to create a balance"});
+        return res.status(400).json({error: "Failed to save transaction"});
     }
 } 
 const updateTransaction = async(req, res) =>{
@@ -84,7 +85,7 @@ const deleteTransaction = async(req,res)=>{
     }
 }
 const deposit = async(req,res)=>{
-    const { accountNumber, depositAmount } = req.body;
+    const { accountName, accountNumber, depositAmount } = req.body;
     
    
     //get the account and add to the balance already there
@@ -109,6 +110,7 @@ const deposit = async(req,res)=>{
             type: 'deposit',
             user: userId._id,
             accountNumber,
+            accountName,
             transactionDate: new Date(), // Optional, since your schema will default to now
         });
         await transaction.save();

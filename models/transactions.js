@@ -23,23 +23,12 @@ const TransactionSchema = new Schema({
     accountNumber:{
         type: String,
         required: true 
-    }
-    /* fromAccount:{
-        type: String,
-        required: function(){
-            return this.type === 'withdrawal' || this.type === 'transfer'; 
-        }
-     },
-     toAccount:{
-         type: String,
-         required: function(){
-            return this.type === 'deposit' || this.type === 'transfer';
-         }
-     },
-     description:{
+    },
+    accountName:{
         type:String,
-     },
-     */
+        
+    }
+  
 
 },{timestamps:true})
 /* TransactionSchema.pre('save', async function (next) {
