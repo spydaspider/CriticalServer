@@ -1,7 +1,6 @@
 const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
-const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
 
@@ -67,15 +66,18 @@ emailTemplate,
 }
 const login = async(req, res) =>{
     const { email, password } = req.body;
-    try{
-        const user = await User.login(email, password);
+    //arrange logs for save
+     try{
+        const user = await User.login(email, password,req);
+
          const token = createToken(user.id);
         const userId = user.id;
         res.status(200).json({email:user.email, token, userId, role: user.role, emailVerified: user.emailVerified, loginLockUntil: user.loginLockUntil}); 
+
     }
     catch(error){
         res.status(400).json({error: error.message,loginLockUntil: error.loginLockUntil || null});
-    }
+    } 
 }
 const getAllUsers = async(req,res)=>{
   try{

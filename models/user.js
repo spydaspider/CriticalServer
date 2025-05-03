@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 const validator = require('validator');
+const LoginLog = require('./loginLogs.js');
+const geoip = require('geoip-lite');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
 
 const UserSchema = new Schema({
@@ -38,7 +40,17 @@ const UserSchema = new Schema({
       loginLockUntil: {
         type: Date,
         default: null
-      }
+      },
+       lastLogin: {
+        ip: String,
+        location: {
+          type: { type: String, default: 'Point' },
+          coordinates: [Number]  // [longitude, latitude]
+        },
+        city: String,
+       region: String,
+       country: String
+    }
 
 
 },{timeStamps: true})
@@ -74,12 +86,17 @@ UserSchema.statics.signup = async function(username, email, password, role){
     
 
 }
-UserSchema.statics.login = async function(email, password){
+UserSchema.statics.login = async function(email, password,req){
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const realIp = ip === '::1' ? '5.151.196.229' : ip; // fallback for testing
+  
+     const loginLogs = new LoginLog({email,ip});
     if(!email || !password)
     {
         throw Error('Enter email and password');
     }
     const isCorrectEmail = await this.findOne({email});
+    
     if(!isCorrectEmail)
     {
         throw Error('Email is not found');
@@ -100,6 +117,8 @@ UserSchema.statics.login = async function(email, password){
     if(!isCorrectPassword)
     {
         isCorrectEmail.failedLoginAttempts += 1;
+        loginLogs.success = false;
+        await loginLogs.save();
     
         await isCorrectEmail.save();
         console.log("Failed");
@@ -124,6 +143,9 @@ UserSchema.statics.login = async function(email, password){
             to: [{ email, name: isCorrectEmail.username }],
             emailTemplate,
             });  
+        
+           
+
             throw err;        
 
             
@@ -135,17 +157,36 @@ UserSchema.statics.login = async function(email, password){
 
     }
     
-    //lock the account if 4 attempts fail
+    //get the location
 
    
+    const geo = geoip.lookup(realIp);
+    if (geo) {
+      isCorrectEmail.lastLogin = {
+        ip: realIp,
+        location: {
+          type: 'Point',
+          coordinates: [geo.ll[1], geo.ll[0]] // [longitude, latitude]
+        },
+        city: geo.city,
+        region: geo.region,
+        country: geo.country
+      };
+    } else {
+      isCorrectEmail.lastLogin = { ip: realIp };
+    }
     //if login is successful this time, reset the attemptssa
     if(isCorrectPassword)
     {
     isCorrectEmail.failedLoginAttempts = 0;
     isCorrectEmail.loginLockUntil = null;
+    loginLogs.success = true;
+    await loginLogs.save();
     await isCorrectEmail.save();
     }
     return isCorrectEmail;
     
 }
+UserSchema.index({ 'lastLogin.location': '2dsphere' });
+
 module.exports = mongoose.model('User', UserSchema);
