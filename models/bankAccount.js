@@ -40,7 +40,7 @@ const BankAccountSchema = new Schema({
         resetPinOTP: {
             type: String,
           },
-          pinOtpExpiresAt: {
+          pinOTPExpiresAt: {
             type: Date,
           },
           failedWithdrawalAttempts: {
