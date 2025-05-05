@@ -143,6 +143,9 @@ const withdrawal = async(req,res)=>{
     //get the account and add to the balance already there
     try{
     const account = await Account.findOne({accountNumber});
+    if (!account) {
+        return res.status(400).json({ error: "Account not found" });
+    }
     const user = await User.findOne({_id: account.user.toString()});
     if(!user)
     {
