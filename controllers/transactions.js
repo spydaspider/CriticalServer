@@ -146,6 +146,20 @@ const withdrawal = async(req,res)=>{
     if (!account) {
         return res.status(400).json({ error: "Account not found" });
     }
+
+    // Check if account is currently locked
+if (account.withdrawalLockUntil && new Date() < account.withdrawalLockUntil) {
+    return res.status(403).json({
+        error: 'Account is locked due to multiple failed withdrawal attempts. Try again later.',
+        withdrawalLockUntil: account.withdrawalLockUntil
+    });
+}
+
+// If lock has expired, clear it
+if (account.withdrawalLockUntil && new Date() >= account.withdrawalLockUntil) {
+    account.withdrawalLockUntil = null;
+    await account.save();
+}
     const user = await User.findOne({_id: account.user.toString()});
     if(!user)
     {
