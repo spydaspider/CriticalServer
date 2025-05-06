@@ -28,7 +28,7 @@ const createAccount = async(req,res)=>{
         //hash the four digit pin
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(pin, salt);
-         const account = await Account.create({accountName,idNumber, address, user,pin:hash, accountNumber: 'ACC'+accountNumber, email });
+         const account = await Account.create({accountName,idNumber,address, user,pin:hash, accountNumber: 'ACC'+accountNumber, email });
          const emailTemplate = `
          <h1>Thank you ${username}!</h1>
          <p>You have successfully created a new bank account with Knackers Bank.</p>

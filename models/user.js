@@ -145,7 +145,7 @@ UserSchema.statics.login = async function(email, password,req){
             });  
         
            
-
+ 
             throw err;        
 
             
@@ -161,20 +161,29 @@ UserSchema.statics.login = async function(email, password,req){
 
    
     const geo = geoip.lookup(realIp);
-    if (geo) {
-      isCorrectEmail.lastLogin = {
-        ip: realIp,
-        location: {
-          type: 'Point',
-          coordinates: [geo.ll[1], geo.ll[0]] // [longitude, latitude]
-        },
-        city: geo.city,
-        region: geo.region,
-        country: geo.country
-      };
-    } else {
-      isCorrectEmail.lastLogin = { ip: realIp };
-    }
+if (geo && geo.ll) {
+  isCorrectEmail.lastLogin = {
+    ip: realIp,
+    location: {
+      type: 'Point',
+      coordinates: [geo.ll[1], geo.ll[0]] // [longitude, latitude]
+    },
+    city: geo.city,
+    region: geo.region,
+    country: geo.country
+  };
+} else {
+  isCorrectEmail.lastLogin = {
+    ip: realIp,
+    location: {
+      type: 'Point',
+      coordinates: [0, 0] // 🔐 fallback to valid coordinates
+    },
+    city: 'Unknown',
+    region: 'Unknown',
+    country: 'Unknown'
+  };
+}
     //if login is successful this time, reset the attemptssa
     if(isCorrectPassword)
     {
