@@ -232,7 +232,7 @@ emailTemplate,
     res.status(200).json(account);
     }
     catch(error){
-        res.status(400).json({error: error.message,withdrawalLockUntil: error.withdrawlLockUntil || null});
+        res.status(400).json({error: error.message,withdrawalLockUntil: error.withdrawalLockUntil || null});
     }
     
 }
