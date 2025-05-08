@@ -43,20 +43,37 @@ const UserSchema = new Schema({
         type: Date,
         default: null
       },
-       lastLogin: {
-        ip: String,
+      lastLogin: {
+        ip: { type: String, required: true },
+    
         location: {
-          type: { type: String, default: 'Point' },
-          coordinates: [Number]  // [longitude, latitude]
+          type: {
+            type: String,
+            enum: ['Point'],
+            required: true,
+            default: 'Point'
+          },
+          coordinates: {
+            type: [Number],                // [lng, lat]
+            required: true,
+            default: [0, 0],               // fallback if geoip fails
+            validate: {
+              validator: arr => arr.length === 2,
+              message: 'Coordinates must be [lng, lat]'
+            }
+          }
         },
-        city: String,
-       region: String,
-       country: String
-    }
+    
+        city:    { type: String, required: true, default: 'Unknown' },
+        region:  { type: String, required: true, default: 'Unknown' },
+        country: { type: String, required: true, default: 'Unknown' }
+      }
 
 
 },{timestamps: true})
-UserSchema.statics.signup = async function(username, email, password, role){
+UserSchema.index({ 'lastLogin.location': '2dsphere' });
+
+UserSchema.statics.signup = async function(username, email, password, role,req){
     if(!username || !email || !password)
     {
         throw Error("Fill in all fields");
@@ -82,18 +99,29 @@ UserSchema.statics.signup = async function(username, email, password, role){
     }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    const defaultLastLogin = {
-      ip: '',
-      location: {
-          type: 'Point',
-          coordinates: [0, 0]  // Default fallback for coordinates (Longitude, Latitude)
-      },
-      city: 'Unknown',
-      region: 'Unknown',
-      country: 'Unknown'
-  };
-    const user = await this.create({username, email, password: hash, role, lastLogin: defaultLastLogin});
-    return user;
+  // Get client IP
+  let ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  if (ip === '::1') ip = '127.0.0.1';
+
+  // GeoIP lookup
+  const geo = geoip.lookup(ip) || {};
+  const [lat, lng] = Array.isArray(geo.ll) && geo.ll.length === 2 ? geo.ll : [0, 0];
+
+  const newUser = await this.create({
+    username,
+    email,
+    password: hash,
+    role,
+    lastLogin: {
+      ip,
+      location: { type: 'Point', coordinates: [lng, lat] },
+      city:    geo.city    || 'Unknown',
+      region:  geo.region  || 'Unknown',
+      country: geo.country || 'Unknown'
+    }
+  });
+
+    return newUser;
 
     
 
@@ -228,8 +256,8 @@ if (geo && geo.ll) {
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
 isCorrectEmail.save();
+return isCorrectEmail;
     
 }
-UserSchema.index({ 'lastLogin.location': '2dsphere' });
 
 module.exports = mongoose.model('User', UserSchema);

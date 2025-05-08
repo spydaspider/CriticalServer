@@ -36,7 +36,7 @@ const signup = async(req, res) =>{
     const { username, email, password, role} = req.body;
     
     try{
-          const user = await User.signup(username, email, password, role);
+          const user = await User.signup(username, email, password, role,req);
           const token = createToken(user.id);
           const userId = user.id;
 
@@ -70,6 +70,9 @@ const login = async(req, res) =>{
     //arrange logs for save
      try{
         const user = await User.login(email, password,req);
+        if(!user){
+          return res.status(400).json({error: "user not found"});
+        }
 
          const token = createToken(user.id);
         const userId = user.id;
