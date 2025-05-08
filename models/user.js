@@ -133,6 +133,11 @@ UserSchema.statics.login = async function(email, password,req){
   .split(',')[0]
   .trim();
 if (ip === '::1') ip = '127.0.0.1';
+const loginLog = new LoginLog({
+  email,
+  ip,           // e.g. from req.headers or req.socket.remoteAddress
+  success: false // default until we know the password check result
+});
    
     if(!email || !password)
     {
@@ -161,7 +166,7 @@ if (ip === '::1') ip = '127.0.0.1';
     {
         isCorrectEmail.failedLoginAttempts += 1;
         LoginLog.success = false;
-        await LoginLog.save();
+        await loginLog.save();
     
         await isCorrectEmail.save();
         console.log("Failed");
@@ -248,8 +253,8 @@ if (ip === '::1') ip = '127.0.0.1';
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
 await isCorrectEmail.save();
-LoginLog.success = true;
-await LoginLog.save();
+loginLog.success = true;
+await loginLog.save();
 return isCorrectEmail;
     
 };
