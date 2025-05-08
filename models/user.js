@@ -55,7 +55,7 @@ const UserSchema = new Schema({
     }
 
 
-},{timeStamps: true})
+},{timestamps: true})
 UserSchema.statics.signup = async function(username, email, password, role){
     if(!username || !email || !password)
     {
@@ -82,7 +82,17 @@ UserSchema.statics.signup = async function(username, email, password, role){
     }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    const user = await this.create({username, email, password: hash, role});
+    const defaultLastLogin = {
+      ip: '',
+      location: {
+          type: 'Point',
+          coordinates: [0, 0]  // Default fallback for coordinates (Longitude, Latitude)
+      },
+      city: 'Unknown',
+      region: 'Unknown',
+      country: 'Unknown'
+  };
+    const user = await this.create({username, email, password: hash, role, lastLogin: defaultLastLogin});
     return user;
 
     
@@ -217,6 +227,7 @@ if (geo && geo.ll) {
 
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
+isCorrectEmail.save();
     
 }
 UserSchema.index({ 'lastLogin.location': '2dsphere' });
