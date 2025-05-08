@@ -4,7 +4,9 @@ const Schema = mongoose.Schema;
 const validator = require('validator');
 const LoginLog = require('./loginLogs.js');
 const geoip = require('geoip-lite');
+const getDistanceInKm = require('../helpers/getDistance.js');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
+
 
 const UserSchema = new Schema({
     username: {
@@ -161,39 +163,60 @@ UserSchema.statics.login = async function(email, password,req){
 
    
     const geo = geoip.lookup(realIp);
+let currentLogin = {
+  ip: realIp,
+  location: {
+    type: 'Point',
+    coordinates: [0, 0] // fallback
+  },
+  city: 'Unknown',
+  region: 'Unknown',
+  country: 'Unknown'
+};
+
 if (geo && geo.ll) {
-  isCorrectEmail.lastLogin = {
+  currentLogin = {
     ip: realIp,
     location: {
       type: 'Point',
-      coordinates: [geo.ll[1], geo.ll[0]] // [longitude, latitude]
+      coordinates: [geo.ll[1], geo.ll[0]] // [lon, lat]
     },
     city: geo.city,
     region: geo.region,
     country: geo.country
   };
-} else {
-  isCorrectEmail.lastLogin = {
-    ip: realIp,
-    location: {
-      type: 'Point',
-      coordinates: [0, 0] // 🔐 fallback to valid coordinates
-    },
-    city: 'Unknown',
-    region: 'Unknown',
-    country: 'Unknown'
-  };
-}
-    //if login is successful this time, reset the attemptssa
-    if(isCorrectPassword)
-    {
-    isCorrectEmail.failedLoginAttempts = 0;
-    isCorrectEmail.loginLockUntil = null;
-    loginLogs.success = true;
-    await loginLogs.save();
-    await isCorrectEmail.save();
+
+  // ✅ Compare to last login for fraud detection
+  const prevLogin = isCorrectEmail.lastLogin;
+  if (prevLogin && prevLogin.location && prevLogin.location.coordinates) {
+    const prevCoords = prevLogin.location.coordinates;
+    const newCoords = currentLogin.location.coordinates;
+
+    const distance = getDistanceInKm(prevCoords, newCoords);
+    const now = new Date();
+    const lastTime = isCorrectEmail.updatedAt || now;
+    const minutesSinceLastLogin = (now - lastTime) / (1000 * 60);
+
+    if (distance > 1000 && minutesSinceLastLogin < 60) {
+      // 🚨 Potential fraud detected
+      const emailTemplate = `
+        <p><strong>Suspicious Login Detected</strong></p>
+        <p>A login occurred from a location over ${Math.round(distance)} km away from your last login.</p>
+        <p><strong>New Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
+        <p>If this wasn’t you, please change your password immediately.</p>
+      `;
+
+      await sendBrevoEmail({
+        subject: 'Suspicious Login Alert',
+        to: [{ email, name: isCorrectEmail.username }],
+        emailTemplate
+      });
     }
-    return isCorrectEmail;
+  }
+}
+
+// Save current login
+isCorrectEmail.lastLogin = currentLogin;
     
 }
 UserSchema.index({ 'lastLogin.location': '2dsphere' });
