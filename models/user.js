@@ -66,7 +66,8 @@ const UserSchema = new Schema({
     
         city:    { type: String, required: true, default: 'Unknown' },
         region:  { type: String, required: true, default: 'Unknown' },
-        country: { type: String, required: true, default: 'Unknown' }
+        country: { type: String, required: true, default: 'Unknown' },
+        at: { type: Date, required: true, default: Date.now }
       }
 
 
@@ -106,7 +107,7 @@ UserSchema.statics.signup = async function(username, email, password, role,req){
   // GeoIP lookup
   const geo = geoip.lookup(ip) || {};
   const [lat, lng] = Array.isArray(geo.ll) && geo.ll.length === 2 ? geo.ll : [0, 0];
-
+  const now = new Date();
   const newUser = await this.create({
     username,
     email,
@@ -117,7 +118,8 @@ UserSchema.statics.signup = async function(username, email, password, role,req){
       location: { type: 'Point', coordinates: [lng, lat] },
       city:    geo.city    || 'Unknown',
       region:  geo.region  || 'Unknown',
-      country: geo.country || 'Unknown'
+      country: geo.country || 'Unknown',
+      at: now
     }
   });
 
@@ -127,10 +129,11 @@ UserSchema.statics.signup = async function(username, email, password, role,req){
 
 }
 UserSchema.statics.login = async function(email, password,req){
-    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
-    const realIp = ip === '::1' ? '5.151.196.229' : ip; // fallback for testing
-  
-     const loginLogs = new LoginLog({email,ip});
+  let ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '')
+  .split(',')[0]
+  .trim();
+if (ip === '::1') ip = '127.0.0.1';
+   
     if(!email || !password)
     {
         throw Error('Enter email and password');
@@ -200,43 +203,32 @@ UserSchema.statics.login = async function(email, password,req){
     //get the location
 
    
-    const geo = geoip.lookup(realIp);
-let currentLogin = {
-  ip: realIp,
-  location: {
-    type: 'Point',
-    coordinates: [0, 0] // fallback
-  },
-  city: 'Unknown',
-  region: 'Unknown',
-  country: 'Unknown'
-};
-
-if (geo && geo.ll) {
-  currentLogin = {
-    ip: realIp,
-    location: {
-      type: 'Point',
-      coordinates: [geo.ll[1], geo.ll[0]] // [lon, lat]
-    },
-    city: geo.city,
-    region: geo.region,
-    country: geo.country
-  };
-
-  // ✅ Compare to last login for fraud detection
-  const prevLogin = isCorrectEmail.lastLogin;
-  if (prevLogin && prevLogin.location && prevLogin.location.coordinates) {
-    const prevCoords = prevLogin.location.coordinates;
-    const newCoords = currentLogin.location.coordinates;
-
-    const distance = getDistanceInKm(prevCoords, newCoords);
+    const geo = geoip.lookup(ip)||{};
     const now = new Date();
-    const lastTime = isCorrectEmail.updatedAt || now;
-    const minutesSinceLastLogin = (now - lastTime) / (1000 * 60);
+  const coords = Array.isArray(geo.ll) && geo.ll.length === 2
+    ? [geo.ll[1], geo.ll[0]]  // [lng, lat]
+    : [0, 0];
+    const currentLogin = {
+      ip,
+      location:   { type: 'Point', coordinates: coords },
+      city:       geo.city    || 'Unknown',
+      region:     geo.region  || 'Unknown',
+      country:    geo.country || 'Unknown',
+      at:         now          // ← include timestamp here
+    };
+  
+
+
+  //  Compare to last login for fraud detection
+  const prevLogin = isCorrectEmail.lastLogin;
+  if (prevLogin && Array.isArray(prevLogin.location.coordinates)) {
+   
+
+    const distance = getDistanceInKm(prevLogin.location.coordinates,coords);
+    const minutesSinceLastLogin = (now - new Date(prev.at)) / 1000/60;
 
     if (distance > 1000 && minutesSinceLastLogin < 60) {
-      // 🚨 Potential fraud detected
+      // Potential fraud detected
       const emailTemplate = `
         <p><strong>Suspicious Login Detected</strong></p>
         <p>A login occurred from a location over ${Math.round(distance)} km away from your last login.</p>
@@ -251,7 +243,7 @@ if (geo && geo.ll) {
       });
     }
   }
-}
+
 
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
@@ -260,6 +252,6 @@ loginLogs.success = true;
 await loginLogs.save();
 return isCorrectEmail;
     
-}
+};
 
 module.exports = mongoose.model('User', UserSchema);
