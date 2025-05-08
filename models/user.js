@@ -160,8 +160,8 @@ if (ip === '::1') ip = '127.0.0.1';
     if(!isCorrectPassword)
     {
         isCorrectEmail.failedLoginAttempts += 1;
-        loginLogs.success = false;
-        await loginLogs.save();
+        LoginLog.success = false;
+        await LoginLog.save();
     
         await isCorrectEmail.save();
         console.log("Failed");
@@ -225,7 +225,7 @@ if (ip === '::1') ip = '127.0.0.1';
    
 
     const distance = getDistanceInKm(prevLogin.location.coordinates,coords);
-    const minutesSinceLastLogin = (now - new Date(prev.at)) / 1000/60;
+    const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
 
     if (distance > 1000 && minutesSinceLastLogin < 60) {
       // Potential fraud detected
@@ -248,8 +248,8 @@ if (ip === '::1') ip = '127.0.0.1';
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
 await isCorrectEmail.save();
-loginLogs.success = true;
-await loginLogs.save();
+LoginLog.success = true;
+await LoginLog.save();
 return isCorrectEmail;
     
 };
