@@ -255,7 +255,9 @@ if (geo && geo.ll) {
 
 // Save current login
 isCorrectEmail.lastLogin = currentLogin;
-isCorrectEmail.save();
+await isCorrectEmail.save();
+loginLogs.success = true;
+await loginLogs.save();
 return isCorrectEmail;
     
 }
