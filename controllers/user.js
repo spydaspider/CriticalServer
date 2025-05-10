@@ -22,11 +22,11 @@ const verifyEmail = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-  
+    console.log(user);
       user.emailVerified = true;
       await user.save();
   
-      res.status(200).send(`<h2>Email verified successfully! 🎉</h2>`);
+      res.status(200).send(`<h2>Email verified successfully!🎉</h2>`);
     } catch (error) {
       res.status(400).send(`<h2>Invalid or expired token.</h2>`);
     }
