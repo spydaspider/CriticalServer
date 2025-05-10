@@ -233,16 +233,18 @@ const loginLog = new LoginLog({
     const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
 
     if (distance > 1000 && minutesSinceLastLogin < 60) {
+      console.log("Fraud detected sign in");
       // Potential fraud detected
       const emailTemplate = `
-        <p><strong>Suspicious Login Detected</strong></p>
-        <p>A login occurred from a location over ${Math.round(distance)} km away from your last login.</p>
-        <p><strong>New Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
-        <p>If this wasn’t you, please change your password immediately.</p>
-      `;
+      <p><strong>Unusual Login Detected</strong></p>
+<p>A login to your KnackersBank account occurred from a different location.</p>
+<p><strong>Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
+<p>If this was not you, we recommend resetting your password immediately.</p>
+<p>Thank you,<br>KnackersBank Security Team</p>
+       `;
 
       await sendBrevoEmail({
-        subject: 'Suspicious Login Alert',
+        subject: 'Unusual Login Alert',
         to: [{ email, name: isCorrectEmail.username }],
         emailTemplate
       });
