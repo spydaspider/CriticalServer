@@ -233,7 +233,10 @@ const loginLog = new LoginLog({
     const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
 
     if (distance > 1000 && minutesSinceLastLogin < 60) {
-      console.log("Fraud detected sign in");
+          isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+
+  // Save the lock status
+  await isCorrectEmail.save();
       // Potential fraud detected
       const emailTemplate = `
       <p><strong>Unusual Login Detected</strong></p>
