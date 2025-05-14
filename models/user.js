@@ -151,7 +151,7 @@ const loginLog = new LoginLog({
     }
     //check to see if system is locked
 
-    if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil > new Date())
+    if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil <= new Date())
     {
         const minutes = Math.ceil((isCorrectEmail.loginLockUntil - new Date())/(60 * 1000));
         const err = new Error(`Account is locked. Try again in ${minutes} minutes(s).`);
