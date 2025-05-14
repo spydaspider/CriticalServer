@@ -176,12 +176,12 @@ const loginLog = new LoginLog({
               isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
             isCorrectEmail.failedLoginAttempts = 0;
             await isCorrectEmail.save();
-            const err = new Error('Password is not correct. Your account is locked for 15 minutes.');
+            const err = new Error('Password is not correct. Your account is locked for 1 minutes.');
             err.loginLockUntil = isCorrectEmail.loginLockUntil;
         
             const emailTemplate = `
             
-                <p>Failed multiple login attempts, we have locked the account for 15minutes, reset your password</p>
+                <p>Failed multiple login attempts, we have locked the account for 1minutes, reset your password</p>
                 
                 
               `;

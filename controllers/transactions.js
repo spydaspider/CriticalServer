@@ -185,13 +185,13 @@ if (account.withdrawalLockUntil && new Date() >= account.withdrawalLockUntil) {
                   account.withdrawalLockUntil = new Date(Date.now() + 1 * 60 * 1000);
                 account.failedWithdrawalAttempts = 0;
                 await account.save();
-                const err = new Error('Pin is not correct. Your account is locked for 15 minutes.');
+                const err = new Error('Pin is not correct. Your account is locked for 1 minutes.');
                 err.withdrawalLockUntil = account.withdrawalLockUntil;
 
                 //send email to notify user
                 const emailTemplate = `
 
-    <p>Failed multiple withdrawal attempts, we have locked the account for 15minutes, reset your pin</p>
+    <p>Failed multiple withdrawal attempts, we have locked the account for 1minutes, reset your pin</p>
     
     
   `;
