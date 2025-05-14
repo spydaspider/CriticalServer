@@ -185,11 +185,7 @@ const loginLog = new LoginLog({
                 
                 
               `;
-              //After password is verified successfully
-              if (isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil <= new Date()) {
-                    isCorrectEmail.loginLockUntil = null;
-                    isCorrectEmail.failedLoginAttempts = 0;
-}
+             
             // Call the Brevo email function
             
             await sendBrevoEmail({
