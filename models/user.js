@@ -173,7 +173,7 @@ const loginLog = new LoginLog({
         console.log("login failed attemptps", isCorrectEmail.failedLoginAttempts);
         if(isCorrectEmail.failedLoginAttempts >= 5){
             console.log("greater than 5");
-              isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+              isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
             isCorrectEmail.failedLoginAttempts = 0;
             await isCorrectEmail.save();
             const err = new Error('Password is not correct. Your account is locked for 15 minutes.');
@@ -181,7 +181,7 @@ const loginLog = new LoginLog({
         
             const emailTemplate = `
             
-                <p>Failed multiple login attempts, we have locked the account for 15minutes, reset your pin</p>
+                <p>Failed multiple login attempts, we have locked the account for 15minutes, reset your password</p>
                 
                 
               `;
@@ -191,10 +191,10 @@ const loginLog = new LoginLog({
             to: [{ email, name: isCorrectEmail.username }],
             emailTemplate,
             });  
-        
+         
            
  
-            throw err;        
+            throw err;         
 
             
     
@@ -233,7 +233,7 @@ const loginLog = new LoginLog({
     const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
 
     if (distance > 1000 && minutesSinceLastLogin < 60) {
-          isCorrectEmail.loginLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+          isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
 
   // Save the lock status
   await isCorrectEmail.save();

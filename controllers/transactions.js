@@ -182,7 +182,7 @@ if (account.withdrawalLockUntil && new Date() >= account.withdrawalLockUntil) {
             console.log("Withdrawal failed attempts", account.failedWithdrawalAttempts);
             if(account.failedWithdrawalAttempts >= 5){
                 
-                  account.withdrawalLockUntil = new Date(Date.now() + 15 * 60 * 1000);
+                  account.withdrawalLockUntil = new Date(Date.now() + 1 * 60 * 1000);
                 account.failedWithdrawalAttempts = 0;
                 await account.save();
                 const err = new Error('Pin is not correct. Your account is locked for 15 minutes.');
