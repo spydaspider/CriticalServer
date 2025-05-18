@@ -232,15 +232,35 @@ const loginLog = new LoginLog({
    
 
     const distance = getDistanceInKm(prevLogin.location.coordinates,coords);
-    const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
+/*     const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
+ */
+    if (distance > 1000) {
+/*           isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
+ */
+   isCorrectEmail.emailVerified = false;
+  /*  const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
 
-    if (distance > 1000 && minutesSinceLastLogin < 60) {
-          isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
-
+          const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${verificationToken}`;
+          
+          const emailTemplate = `
+            <h1>Unsual Login Detected</h1>
+            <p>A login to your KnackersBank account occurred from a different location.</p>
+<p><strong>Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
+            <p>Please verify your email by clicking the link below:</p>
+            <a href="${verificationLink}">Verify Email</a>
+          `;
+// Call the Brevo email function
+await sendBrevoEmail({
+subject: 'Unusual login!',
+to: [{ email: isCorrectEmail.email, name: isCorrectEmail.username }],
+emailTemplate,
+});
+   await isCorrectEmail.save();
+   //send verfication link again to verify email
   // Save the lock status
-  await isCorrectEmail.save();
+  await isCorrectEmail.save(); */
       // Potential fraud detected
-      const emailTemplate = `
+     /*  const emailTemplate2 = `
       <p><strong>Unusual Login Detected</strong></p>
 <p>A login to your KnackersBank account occurred from a different location.</p>
 <p><strong>Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
@@ -251,8 +271,9 @@ const loginLog = new LoginLog({
       await sendBrevoEmail({
         subject: 'Unusual Login Alert',
         to: [{ email, name: isCorrectEmail.username }],
-        emailTemplate
-      });
+        emailTemplate2
+      }); */
+      
     }
   }
 
