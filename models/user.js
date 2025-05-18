@@ -238,7 +238,7 @@ const loginLog = new LoginLog({
 /*           isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
  */
    isCorrectEmail.emailVerified = false;
-  /*  const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
+    const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
 
           const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${verificationToken}`;
           
@@ -255,10 +255,10 @@ subject: 'Unusual login!',
 to: [{ email: isCorrectEmail.email, name: isCorrectEmail.username }],
 emailTemplate,
 });
-   await isCorrectEmail.save();
+  /*  await isCorrectEmail.save();
    //send verfication link again to verify email
   // Save the lock status
-  await isCorrectEmail.save(); */
+  await isCorrectEmail.save();  */
       // Potential fraud detected
      /*  const emailTemplate2 = `
       <p><strong>Unusual Login Detected</strong></p>
