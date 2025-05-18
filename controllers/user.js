@@ -22,8 +22,28 @@ const verifyEmail = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-    console.log(user);
-      user.emailVerified = true;
+    
+      if (!user.pendingLogin) {
+      return res.status(400).send("No pending login to verify");
+    }
+
+
+    user.lastLogin = user.pendingLogin;
+
+    
+    user.trustedLogins.push({
+      ip:       user.pendingLogin.ip,
+      location: user.pendingLogin.location,
+      city:     user.pendingLogin.city,
+      region:   user.pendingLogin.region,
+      country:  user.pendingLogin.country,
+      addedAt:  new Date()
+    });
+
+    // 3) Clear pendingLogin and re-verify
+    user.pendingLogin  = undefined;
+    user.loginLockUntil      = null;
+    user.failedLoginAttempts = 0;
       await user.save();
   
       res.status(200).send(`<h2>Email verified successfully!🎉</h2>`);

@@ -70,7 +70,40 @@ const UserSchema = new Schema({
         region:  { type: String, required: true, default: 'Unknown' },
         country: { type: String, required: true, default: 'Unknown' },
         at: { type: Date, required: true, default: Date.now }
+      },
+      trustedLogins: [
+  {
+    ip: { type: String, required: true },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],
+        required: true
       }
+    },
+    city: String,
+    region: String,
+    country: String,
+    addedAt: { type: Date, default: Date.now }
+  }
+],
+pendingLogin: {
+  ip: String,
+  location: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], default: [0, 0] }
+  },
+  city:    String,
+  region:  String,
+  country: String,
+  at:      Date
+},
+
 
 
 },{timestamps: true})
@@ -236,9 +269,16 @@ const loginLog = new LoginLog({
     const distance = getDistanceInKm(prevLogin.location.coordinates,coords);
 /*     const minutesSinceLastLogin = (now - new Date(prevLogin.at)) / 1000/60;
  */
+ const isTrusted = isCorrectEmail.trustedLogins?.some(trusted => {
+    return trusted.ip === ip ||
+           getDistanceInKm(trusted.location.coordinates, coords) < 100; // trusted radius
+  });
+     if (!isTrusted && prevLogin && Array.isArray(prevLogin.location.coordinates)){
     if (distance > 1000) {
 /*           isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
  */
+     isCorrectEmail.pendingLogin = currentLogin;
+
    isCorrectEmail.emailVerified = false;
    await isCorrectEmail.save();
     const verificationToken = jwt.sign({ _id: isCorrectEmail._id }, process.env.SECRET, { expiresIn: '1d' });
@@ -276,18 +316,18 @@ emailTemplate,
         to: [{ email, name: isCorrectEmail.username }],
         emailTemplate2
       }); */
-      
+        throw new Error("Unusual login detected. Please verify your email.");
+
     }
+  }
   }
 
 
 // Save current login
-if(isCorrectEmail.emailVerified === false)
-{
-  throw Error("Unusual login detected.Please verify your email");
-}
-isCorrectEmail.lastLogin = currentLogin;
-await isCorrectEmail.save();
+
+
+ isCorrectEmail.lastLogin = currentLogin;
+ await isCorrectEmail.save();
 loginLog.success = true;
 await loginLog.save();
 return isCorrectEmail;
