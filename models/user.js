@@ -240,6 +240,7 @@ const loginLog = new LoginLog({
 /*           isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
  */
    isCorrectEmail.emailVerified = false;
+   await isCorrectEmail.save();
     const verificationToken = jwt.sign({ _id: isCorrectEmail._id }, process.env.SECRET, { expiresIn: '1d' });
 
           const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${verificationToken}`;
@@ -281,6 +282,10 @@ emailTemplate,
 
 
 // Save current login
+if(isCorrectEmail.emailVerified === false)
+{
+  throw Error("Unusual login detected.Please verify your email");
+}
 isCorrectEmail.lastLogin = currentLogin;
 await isCorrectEmail.save();
 loginLog.success = true;
