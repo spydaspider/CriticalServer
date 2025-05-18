@@ -12,7 +12,21 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
 };
 
+const verifySignup = async(req,res)=>{
+   try {
+    const { token } = req.query;
+    const { _id } = jwt.verify(token, process.env.SECRET);
+    const user = await User.findById(_id);
+    if (!user) return res.status(404).send("User not found");
 
+    user.emailVerified = true;
+    await user.save();
+    res.send("<h2>Your email has been verified—welcome aboard! 🎉</h2>");
+  } catch (err) {
+    res.status(400).send("<h2>Invalid or expired signup token.</h2>");
+  }
+
+}
 const verifyEmail = async (req, res) => {
     const { token } = req.query;
   
@@ -58,11 +72,17 @@ const signup = async(req, res) =>{
     try{
           const user = await User.signup(username, email, password, role,req);
           const token = createToken(user.id);
+          
           const userId = user.id;
+           const signupToken = jwt.sign(
+    { _id: user._id },
+     process.env.SECRET,
+     { expiresIn: '1d' }
+           );
 
-          const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
-
-          const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${verificationToken}`;
+/*           const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
+ */
+          const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${signupToken}`;
           
           const emailTemplate = `
             <h1>Welcome ${username}!</h1>
@@ -192,4 +212,4 @@ const verifyOTPAndResetPassword = async (req, res) => {
 
 
 
-module.exports = { signup, login, verifyEmail,getAllUsers,forgotPassword,verifyOTPAndResetPassword}
+module.exports = { signup, login, verifyEmail,getAllUsers,forgotPassword,verifyOTPAndResetPassword,verifySignup}
