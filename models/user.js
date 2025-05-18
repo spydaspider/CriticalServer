@@ -6,6 +6,8 @@ const LoginLog = require('./loginLogs.js');
 const geoip = require('geoip-lite');
 const getDistanceInKm = require('../helpers/getDistance.js');
 const sendBrevoEmail = require('../utilities/emailSender.js'); // adjust the path accordingly
+const jwt = require('jsonwebtoken');
+
 
 
 const UserSchema = new Schema({
