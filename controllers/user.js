@@ -82,7 +82,7 @@ const signup = async(req, res) =>{
 
 /*           const verificationToken = jwt.sign({ _id: user._id }, process.env.SECRET, { expiresIn: '1d' });
  */
-          const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifyEmail?token=${signupToken}`;
+          const verificationLink = `https://criticalbankbackend-4a0be9a2198b.herokuapp.com/api/users/verifySignup?token=${signupToken}`;
           
           const emailTemplate = `
             <h1>Welcome ${username}!</h1>
