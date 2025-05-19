@@ -210,7 +210,7 @@ throw err;
     
             
     
-            return res.status(400).json({error: 'Incorrect pin, cannot proceed with the transaction'});
+            return res.status(403).json({error: 'Incorrect pin, cannot proceed with the transaction'});
             
         }
     
