@@ -168,7 +168,7 @@ if (account.withdrawalLockUntil && new Date() >= account.withdrawalLockUntil) {
 
     if(parseFloat(account.balance.toString()) < parseFloat(withdrawalAmount))
     {
-        res.status(400).json({error:'You do not have insufficient funds.'});
+        res.status(400).json({error:'You do not have sufficient funds.'});
         return;
     }
     //compare pin

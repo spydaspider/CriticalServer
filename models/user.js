@@ -189,7 +189,7 @@ const loginLog = new LoginLog({
     if(isCorrectEmail.loginLockUntil && isCorrectEmail.loginLockUntil > new Date())
     {
         const minutes = Math.ceil((isCorrectEmail.loginLockUntil - new Date())/(60 * 1000));
-        const err = new Error(`Account is locked. Try again in ${minutes} minutes(s).`);
+        const err = new Error(`Account is locked. Try again in ${minutes} minute(s).`);
         err.loginLockUntil = isCorrectEmail.loginLockUntil;
         throw err;
 
@@ -211,12 +211,12 @@ const loginLog = new LoginLog({
               isCorrectEmail.loginLockUntil = new Date(Date.now() + 1 * 60 * 1000);
             isCorrectEmail.failedLoginAttempts = 0;
             await isCorrectEmail.save();
-            const err = new Error('Password is not correct. Your account is locked for 1 minutes.');
+            const err = new Error('Password is not correct. Your account is locked for 1 minute.');
             err.loginLockUntil = isCorrectEmail.loginLockUntil;
         
             const emailTemplate = `
             
-                <p>Failed multiple login attempts, we have locked the account for 1minutes, reset your password</p>
+                <p>Failed multiple login attempts, we have locked the account for 1 minute, reset your password</p>
                 
                 
               `;
