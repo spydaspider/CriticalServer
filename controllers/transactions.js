@@ -138,7 +138,7 @@ emailTemplate,
     
 }
 const withdrawal = async(req,res)=>{
-    const { accountNumber, withdrawalAmount, pin } = req.body;
+    const { accountName, accountNumber, withdrawalAmount, pin } = req.body;
    
     //get the account and add to the balance already there
     try{
@@ -224,6 +224,7 @@ throw err;
         amount: withdrawalAmount,
         type: 'withdrawal',
         user: userId._id,
+        accountName,
         accountNumber,
         transactionDate: new Date(), // Optional, since your schema will default to now
     });
