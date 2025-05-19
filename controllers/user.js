@@ -58,6 +58,8 @@ const verifyEmail = async (req, res) => {
     user.pendingLogin  = undefined;
     user.loginLockUntil      = null;
     user.failedLoginAttempts = 0;
+        user.emailVerified = true;
+
       await user.save();
   
       res.status(200).send(`<h2>Email verified successfully!🎉</h2>`);
