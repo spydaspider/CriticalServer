@@ -290,7 +290,7 @@ const loginLog = new LoginLog({
             <p>A login to your KnackersBank account occurred from a different location.</p>
 <p><strong>Location:</strong> ${geo.city}, ${geo.region}, ${geo.country}</p>
             <p>Please verify your email by clicking the link below:</p>
-            <a href="${verificationLink}">Verify Email</a>
+            <a href="${verificationLink}">Yes, it's me</a>
           `;
 // Call the Brevo email function
 await sendBrevoEmail({
